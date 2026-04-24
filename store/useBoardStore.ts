@@ -28,11 +28,13 @@ export interface Cluster {
 
 interface BoardState {
   sessionId: string | null;
+  projectId: string | null;
   clusters: Cluster[];
   isClustering: boolean;
   clusteringError: string | null;
   
-  setSessionId: (id: string) => void;
+  setSessionId: (id: string | null) => void;
+  setProjectId: (id: string | null) => void;
   setClusters: (clusters: Cluster[]) => void;
   hydrate: (clusters: Cluster[]) => void;
   
@@ -41,18 +43,22 @@ interface BoardState {
   addCluster: () => void;
   deleteCluster: (clusterId: string) => void;
   
-  clusterBoard: (sessionId: string) => Promise<void>;
+  clusterBoard: (id: string, type: 'session' | 'project') => Promise<void>;
+  syncBoard: () => Promise<void>;
 }
 
 let writeTimeout: NodeJS.Timeout;
 
-const persistToSupabase = (sessionId: string, clusters: Cluster[]) => {
+const persistToSupabase = (id: string, type: 'session' | 'project', clusters: Cluster[]) => {
   clearTimeout(writeTimeout);
   writeTimeout = setTimeout(async () => {
     const supabase = createClient();
-    const { error } = await (supabase.from('boards') as any)
-      .update({ clusters, last_edited_at: new Date().toISOString() })
-      .eq('session_id', sessionId);
+    const query = (supabase.from('boards') as any)
+      .update({ clusters, last_edited_at: new Date().toISOString() });
+    
+    const { error } = type === 'session' 
+      ? await query.eq('session_id', id)
+      : await query.eq('project_id', id);
     
     if (error) console.error('Supabase Board Sync Error:', error);
   }, 500);
@@ -62,19 +68,28 @@ export const useBoardStore = create<BoardState>()(
   persist(
     (set, get) => ({
       sessionId: null,
+      projectId: null,
       clusters: [],
       isClustering: false,
       clusteringError: null,
 
-      setSessionId: (id) => set({ sessionId: id }),
+      setSessionId: (id) => set({ sessionId: id, projectId: null }),
+      setProjectId: (id) => set({ projectId: id, sessionId: null }),
 
       setClusters: (clusters) => {
         set({ clusters });
-        const sessionId = get().sessionId;
-        if (sessionId) persistToSupabase(sessionId, clusters);
+        const { sessionId, projectId } = get();
+        if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+        else if (projectId) persistToSupabase(projectId, 'project', clusters);
       },
 
       hydrate: (clusters) => set({ clusters }),
+
+      syncBoard: async () => {
+        const { sessionId, projectId, clusters } = get();
+        if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+        else if (projectId) persistToSupabase(projectId, 'project', clusters);
+      },
 
       moveCard: (cardId, fromClusterId, toClusterId) => {
         const clusters = [...get().clusters];
@@ -91,8 +106,9 @@ export const useBoardStore = create<BoardState>()(
             toCluster.cardIds.push(cardId);
             
             set({ clusters });
-            const sessionId = get().sessionId;
-            if (sessionId) persistToSupabase(sessionId, clusters);
+            const { sessionId, projectId } = get();
+            if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+            else if (projectId) persistToSupabase(projectId, 'project', clusters);
           }
         }
       },
@@ -102,8 +118,9 @@ export const useBoardStore = create<BoardState>()(
           c.id === clusterId ? { ...c, name } : c
         );
         set({ clusters });
-        const sessionId = get().sessionId;
-        if (sessionId) persistToSupabase(sessionId, clusters);
+        const { sessionId, projectId } = get();
+        if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+        else if (projectId) persistToSupabase(projectId, 'project', clusters);
       },
 
       addCluster: () => {
@@ -113,12 +130,13 @@ export const useBoardStore = create<BoardState>()(
           synthesis: '',
           cardIds: [],
           cards: [],
-          accentColor: 'violet'
+          accentColor: 'indigo'
         };
         const clusters = [...get().clusters, newCluster];
         set({ clusters });
-        const sessionId = get().sessionId;
-        if (sessionId) persistToSupabase(sessionId, clusters);
+        const { sessionId, projectId } = get();
+        if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+        else if (projectId) persistToSupabase(projectId, 'project', clusters);
       },
 
       deleteCluster: (clusterId) => {
@@ -145,17 +163,19 @@ export const useBoardStore = create<BoardState>()(
         }
 
         set({ clusters });
-        const sessionId = get().sessionId;
-        if (sessionId) persistToSupabase(sessionId, clusters);
+        const { sessionId, projectId } = get();
+        if (sessionId) persistToSupabase(sessionId, 'session', clusters);
+        else if (projectId) persistToSupabase(projectId, 'project', clusters);
       },
 
-      clusterBoard: async (sessionId) => {
+      clusterBoard: async (id, type) => {
         set({ isClustering: true, clusteringError: null });
         try {
+          const body = type === 'session' ? { sessionId: id } : { projectId: id };
           const response = await fetch('/api/ai/cluster', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId }),
+            body: JSON.stringify(body),
           });
 
           if (!response.ok) {
@@ -163,18 +183,8 @@ export const useBoardStore = create<BoardState>()(
             throw new Error(err.error || 'Clustering failed');
           }
 
-          await response.json();
-          // The board API already updates Supabase, so we just need to hydrate local state
-          // But usually we want to fetch the latest state from Supabase to be sure
-          const supabase = createClient();
-          const { data } = await (supabase.from('boards') as any)
-            .select('clusters')
-            .eq('session_id', sessionId)
-            .single();
-
-          if (data) {
-            set({ clusters: (data as any).clusters as Cluster[] });
-          }
+          const { clusters } = await response.json();
+          set({ clusters });
         } catch (error: any) {
           set({ clusteringError: error.message });
         } finally {
@@ -186,6 +196,7 @@ export const useBoardStore = create<BoardState>()(
       name: 'incubx-board-state',
       partialize: (state) => ({
         sessionId: state.sessionId,
+        projectId: state.projectId,
         clusters: state.clusters,
       }),
     }

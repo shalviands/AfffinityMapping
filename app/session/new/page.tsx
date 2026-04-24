@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useSessionStore } from '@/store/useSessionStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,14 +10,32 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowRight, Info } from 'lucide-react';
+import { Loader2, ArrowRight, Info, Briefcase } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function NewSessionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
   const supabase = createClient();
   const { formData, updateFormData, setSession } = useSessionStore();
   const [loading, setLoading] = useState(false);
+  const [project, setProject] = useState<any>(null);
+
+  useEffect(() => {
+    if (projectId) {
+      updateFormData({ project_id: projectId });
+      // Fetch project to get sector
+      const fetchProject = async () => {
+        const { data } = await supabase.from('projects').select('*').eq('id', projectId).single();
+        if (data) {
+          setProject(data);
+          updateFormData({ sector: data.sector });
+        }
+      };
+      fetchProject();
+    }
+  }, [projectId, updateFormData, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +44,8 @@ export default function NewSessionPage() {
     try {
       const { data, error } = await (supabase.from('sessions') as any)
         .insert({
-          name: formData.name || `Session ${new Date().toLocaleDateString()}`,
+          project_id: projectId || null,
+          name: formData.name || `${formData.stakeholder_name} - ${new Date().toLocaleDateString()}`,
           stakeholder_name: formData.stakeholder_name,
           stakeholder_role: formData.stakeholder_role,
           interview_date: formData.interview_date,
@@ -57,9 +76,21 @@ export default function NewSessionPage() {
   return (
     <div className="max-w-3xl mx-auto py-12 px-6">
       <div className="mb-8 space-y-2">
-        <h1 className="text-3xl font-bold text-slate-900">New Research Session</h1>
+        <h1 className="text-3xl font-bold text-slate-900">New Stakeholder Interview</h1>
         <p className="text-slate-600">Enter the details of your interview to start capturing insights.</p>
       </div>
+
+      {project && (
+        <div className="mb-8 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-indigo-600 shadow-sm">
+            <Briefcase className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Project Context</p>
+            <h3 className="text-lg font-bold text-slate-800">{project.name}</h3>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <Card className="border-slate-200 shadow-sm">

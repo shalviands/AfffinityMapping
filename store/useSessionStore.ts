@@ -16,6 +16,7 @@ export interface SessionData {
   guided_mode: boolean;
   consent_timestamp?: string | null;
   status?: string;
+  project_id?: string;
 }
 
 interface SessionState {
@@ -59,6 +60,7 @@ export const useSessionStore = create<SessionState>()(
         sorting_mode: 'ai-first',
         guided_mode: true,
         consent_timestamp: null,
+        project_id: '',
       },
 
       setSession: (session) => set({ session }),
@@ -92,6 +94,7 @@ export const useSessionStore = create<SessionState>()(
           sorting_mode: 'ai-first',
           guided_mode: true,
           consent_timestamp: null,
+          project_id: '',
         },
       }),
     }),

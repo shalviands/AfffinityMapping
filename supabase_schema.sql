@@ -5,16 +5,27 @@ drop table if exists public.extracted_cards cascade;
 drop table if exists public.transcripts cascade;
 drop table if exists public.boards cascade;
 drop table if exists public.sessions cascade;
+drop table if exists public.projects cascade;
 
--- 1. Sessions table
+-- 1. Projects table
+create table public.projects (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  sector text not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- 2. Sessions table
 create table public.sessions (
   id uuid default gen_random_uuid() primary key,
+  project_id uuid references public.projects(id) on delete cascade,
   name text not null,
   stakeholder_name text not null,
   stakeholder_role text,
   interview_date timestamptz,
   interview_method text,
-  sector text not null,
+  sector text, -- copied from project but can be overridden
   stage text not null,
   round_number integer,
   research_question text not null,
@@ -26,17 +37,19 @@ create table public.sessions (
   updated_at timestamptz default now()
 );
 
--- 2. Boards table
+-- 3. Boards table (Now linked to project or session? Let's keep it session-linked for now as per "individual collection" but add project link)
 create table public.boards (
   id uuid default gen_random_uuid() primary key,
-  session_id uuid references public.sessions(id) on delete cascade not null,
+  project_id uuid references public.projects(id) on delete cascade,
+  session_id uuid references public.sessions(id) on delete cascade, -- can be null if it's a project board
   clusters jsonb not null default '[]'::jsonb,
   last_edited_at timestamptz default now(),
   version integer default 1,
-  unique(session_id)
+  unique(session_id),
+  unique(project_id) -- one board per project too
 );
 
--- 3. Transcripts table
+-- 4. Transcripts table
 create table public.transcripts (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references public.sessions(id) on delete cascade not null,
@@ -48,7 +61,7 @@ create table public.transcripts (
   created_at timestamptz default now()
 );
 
--- 4. Extracted Cards table
+-- 5. Extracted Cards table
 create table public.extracted_cards (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references public.sessions(id) on delete cascade not null,
@@ -64,7 +77,7 @@ create table public.extracted_cards (
   created_at timestamptz default now()
 );
 
--- 5. Confirmed Cards table
+-- 6. Confirmed Cards table
 create table public.confirmed_cards (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references public.sessions(id) on delete cascade not null,
@@ -83,7 +96,7 @@ create table public.confirmed_cards (
   created_at timestamptz default now()
 );
 
--- 6. Comments table
+-- 7. Comments table
 create table public.comments (
   id uuid default gen_random_uuid() primary key,
   session_id uuid references public.sessions(id) on delete cascade not null,
@@ -99,8 +112,10 @@ create table public.comments (
 alter publication supabase_realtime add table public.boards;
 alter publication supabase_realtime add table public.sessions;
 alter publication supabase_realtime add table public.confirmed_cards;
+alter publication supabase_realtime add table public.projects;
 
--- Basic RLS (Disable for initial development/setup if needed, but good to have)
+-- Basic RLS
+alter table public.projects enable row level security;
 alter table public.sessions enable row level security;
 alter table public.boards enable row level security;
 alter table public.transcripts enable row level security;
@@ -109,6 +124,7 @@ alter table public.confirmed_cards enable row level security;
 alter table public.comments enable row level security;
 
 -- Simple "allow all" policies for development
+create policy "Allow all for projects" on public.projects for all using (true);
 create policy "Allow all for sessions" on public.sessions for all using (true);
 create policy "Allow all for boards" on public.boards for all using (true);
 create policy "Allow all for transcripts" on public.transcripts for all using (true);
