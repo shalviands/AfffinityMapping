@@ -27,14 +27,14 @@ export async function POST(req: NextRequest) {
       if (pError || !project) return NextResponse.json({ error: 'Project not found' }, { status: 404 });
       contextData = {
         research_question: 'Aggregate analysis of multiple stakeholders',
-        sector: project.sector,
+        sector: (project as any).sector,
         stage: 'Synthesis'
       };
 
       // Fetch all confirmed cards for all sessions in this project
       const { data: sessions } = await supabase.from('sessions').select('id').eq('project_id', projectId);
       if (sessions && sessions.length > 0) {
-        const sessionIds = sessions.map(s => s.id);
+        const sessionIds = sessions.map(s => (s as any).id);
         const { data: cards } = await supabase
           .from('confirmed_cards')
           .select('*')
