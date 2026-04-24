@@ -68,8 +68,8 @@ export default function ProjectPage() {
     if (!newName) return;
     const newRole = prompt('Enter new stakeholder role:', session.stakeholder_role);
     
-    const { error } = await supabase
-      .from('sessions')
+    const { error } = await (supabase
+      .from('sessions') as any)
       .update({ stakeholder_name: newName, stakeholder_role: newRole })
       .eq('id', session.id);
 

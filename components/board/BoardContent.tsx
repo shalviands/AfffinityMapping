@@ -82,7 +82,7 @@ export function BoardContent() {
             </div>
             
             <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
-              {cluster.cards.map((card) => (
+              {(cluster.cards || []).map((card) => (
                 <motion.div 
                   layoutId={card.id}
                   key={card.id}
