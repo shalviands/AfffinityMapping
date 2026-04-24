@@ -108,7 +108,7 @@ function SortableCard({ card, clusterId }: { card: Card; clusterId: string }) {
   );
 }
 
-export function BoardContent({ problemStatement }: { problemStatement?: string }) {
+export function BoardContent({ problemStatement, onEditProblem }: { problemStatement?: string, onEditProblem?: () => void }) {
   const { clusters, setClusters, renameCluster, addCluster, deleteCluster, moveCard, isGuided } = useBoardStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
@@ -176,14 +176,19 @@ export function BoardContent({ problemStatement }: { problemStatement?: string }
     >
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-8 flex flex-col gap-6 items-start h-full bg-slate-50 relative">
         {problemStatement && (
-          <div className="flex-shrink-0 w-full max-w-4xl bg-white/80 backdrop-blur border border-slate-200 p-4 rounded-2xl flex items-center gap-4 mb-2 shadow-sm">
+          <div className="flex-shrink-0 w-full max-w-4xl bg-white/80 backdrop-blur border border-slate-200 p-4 rounded-2xl flex items-center gap-4 mb-2 shadow-sm group">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
               <Target className="w-5 h-5 text-indigo-600" />
             </div>
-            <div>
+            <div className="flex-1">
               <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Core Problem Statement</p>
               <p className="text-slate-700 font-medium leading-tight">{problemStatement}</p>
             </div>
+            {onEditProblem && (
+              <Button variant="ghost" size="icon" className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={onEditProblem}>
+                <Edit2 className="w-4 h-4 text-slate-400" />
+              </Button>
+            )}
           </div>
         )}
 

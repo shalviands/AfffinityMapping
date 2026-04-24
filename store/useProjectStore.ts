@@ -15,6 +15,7 @@ interface ProjectState {
   error: string | null;
   fetchProjects: () => Promise<void>;
   addProject: (name: string, sector: string, problemStatement: string) => Promise<Project | null>;
+  updateProject: (id: string, data: Partial<Project>) => Promise<boolean>;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -51,5 +52,22 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     set({ projects: [data, ...get().projects] });
     return data;
+  },
+
+  updateProject: async (id: string, data: Partial<Project>) => {
+    const supabase = createClient();
+    const { error } = await (supabase.from('projects') as any)
+      .update(data)
+      .eq('id', id);
+
+    if (error) {
+      set({ error: error.message });
+      return false;
+    }
+
+    set({
+      projects: get().projects.map((p) => (p.id === id ? { ...p, ...data } : p)),
+    });
+    return true;
   },
 }));

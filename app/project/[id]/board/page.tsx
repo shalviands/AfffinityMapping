@@ -79,6 +79,25 @@ export default function ProjectBoardPage() {
     }
   };
 
+  const handleEditProblem = async () => {
+    const newProblem = prompt('Edit core problem statement:', project?.problem_statement);
+    if (newProblem === null) return;
+    
+    const { error } = await (supabase
+      .from('projects') as any)
+      .update({ problem_statement: newProblem })
+      .eq('id', projectId);
+
+    if (error) {
+      toast.error('Failed to update problem statement');
+    } else {
+      toast.success('Problem statement updated');
+      // Refresh project data
+      const { data: pData } = await supabase.from('projects').select('*').eq('id', projectId).single();
+      setProject(pData);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
@@ -93,8 +112,9 @@ export default function ProjectBoardPage() {
       {/* Tool Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm shrink-0">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="w-5 h-5" />
+          <Button variant="ghost" onClick={() => router.push(`/project/${projectId}`)}>
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Project
           </Button>
           <div>
             <div className="flex items-center gap-2">
@@ -138,7 +158,7 @@ export default function ProjectBoardPage() {
 
       {/* Board Content */}
       <div className="flex-1 overflow-hidden">
-        <BoardContent problemStatement={project?.problem_statement} />
+        <BoardContent problemStatement={project?.problem_statement} onEditProblem={handleEditProblem} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2, Edit2, Trash2, MoreVertical, FileText, Settings } from 'lucide-react';
+import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2, Edit2, Trash2, MoreVertical, FileText, Settings, Target } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
@@ -105,6 +105,23 @@ export default function ProjectPage() {
     }
   };
 
+  const handleEditProblemStatement = async () => {
+    const newProblem = prompt('Edit core problem statement:', project.problem_statement);
+    if (newProblem === null) return;
+    
+    const { error } = await (supabase
+      .from('projects') as any)
+      .update({ problem_statement: newProblem })
+      .eq('id', projectId);
+
+    if (error) {
+      toast.error('Failed to update problem statement');
+    } else {
+      toast.success('Problem statement updated');
+      fetchData();
+    }
+  };
+
   const handleDeleteProject = async () => {
     if (!confirm('EXTREME CAUTION: Are you sure you want to delete this ENTIRE project? All stakeholders, transcripts, and synthesis data will be permanently deleted.')) return;
     
@@ -153,9 +170,18 @@ export default function ProjectPage() {
             {project.sector}
           </Badge>
           <h1 className="text-4xl font-bold text-slate-900">{project.name}</h1>
-          <p className="text-slate-500 max-w-2xl">
-            Created on {new Date(project.created_at).toLocaleDateString()}
-          </p>
+          <div className="flex items-start gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 max-w-2xl group">
+            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 shadow-sm">
+              <Target className="w-4 h-4 text-indigo-500" />
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Problem Statement</p>
+              <p className="text-sm text-slate-600 leading-relaxed">{project.problem_statement || 'No problem statement defined.'}</p>
+            </div>
+            <Button variant="ghost" size="icon" className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity" onClick={handleEditProblemStatement}>
+              <Edit2 className="w-3.5 h-3.5 text-slate-400" />
+            </Button>
+          </div>
         </div>
         <div className="flex gap-3">
            <DropdownMenu>
@@ -167,6 +193,9 @@ export default function ProjectPage() {
              <DropdownMenuContent align="end">
                <DropdownMenuItem onClick={handleRenameProject}>
                  <Edit2 className="w-4 h-4 mr-2" /> Rename Project
+               </DropdownMenuItem>
+               <DropdownMenuItem onClick={handleEditProblemStatement}>
+                 <Target className="w-4 h-4 mr-2" /> Edit Problem Statement
                </DropdownMenuItem>
                <DropdownMenuSeparator />
                <DropdownMenuItem onClick={handleDeleteProject} className="text-red-600 font-bold">
