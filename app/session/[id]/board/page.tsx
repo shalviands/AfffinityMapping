@@ -22,12 +22,17 @@ export default function BoardPage() {
   } = useBoardStore();
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     setSessionId(sessionId);
     
     // Initial fetch
     const fetchBoard = async () => {
+      // Fetch session for research question
+      const { data: sData } = await supabase.from('sessions').select('research_question').eq('id', sessionId).single();
+      setSession(sData);
+
       const { data, error } = await supabase
         .from('boards')
         .select('*')
@@ -125,7 +130,7 @@ export default function BoardPage() {
       </header>
 
       {/* Main Board Area */}
-      <BoardContent />
+      <BoardContent problemStatement={session?.research_question} />
     </div>
   );
 }

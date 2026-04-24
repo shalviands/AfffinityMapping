@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       
       if (pError || !project) return NextResponse.json({ error: 'Project not found' }, { status: 404 });
       contextData = {
-        research_question: 'Aggregate analysis of multiple stakeholders',
+        research_question: (project as any).problem_statement || 'Aggregate analysis of multiple stakeholders',
         sector: (project as any).sector,
         stage: 'Synthesis'
       };

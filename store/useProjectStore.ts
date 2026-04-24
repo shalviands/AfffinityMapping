@@ -5,6 +5,7 @@ interface Project {
   id: string;
   name: string;
   sector: string;
+  problem_statement?: string;
   created_at: string;
 }
 
@@ -13,7 +14,7 @@ interface ProjectState {
   loading: boolean;
   error: string | null;
   fetchProjects: () => Promise<void>;
-  addProject: (name: string, sector: string) => Promise<Project | null>;
+  addProject: (name: string, sector: string, problemStatement: string) => Promise<Project | null>;
 }
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -36,10 +37,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     }
   },
 
-  addProject: async (name: string, sector: string) => {
+  addProject: async (name: string, sector: string, problemStatement: string) => {
     const supabase = createClient();
     const { data, error } = await (supabase.from('projects') as any)
-      .insert({ name, sector })
+      .insert({ name, sector, problem_statement: problemStatement })
       .select()
       .single();
 

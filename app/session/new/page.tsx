@@ -19,9 +19,13 @@ function NewSessionContent() {
   const searchParams = useSearchParams();
   const projectId = searchParams.get('projectId');
   const supabase = createClient();
-  const { formData, updateFormData, setSession } = useSessionStore();
+  const { formData, updateFormData, setSession, resetSession } = useSessionStore();
   const [loading, setLoading] = useState(false);
   const [project, setProject] = useState<any>(null);
+
+  useEffect(() => {
+    resetSession(); // Clear previous session data on mount
+  }, [resetSession]);
 
   useEffect(() => {
     if (projectId) {

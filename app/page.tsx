@@ -14,6 +14,7 @@ export default function Home() {
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newSector, setNewSector] = useState('');
+  const [newProblemStatement, setNewProblemStatement] = useState('');
 
   useEffect(() => {
     fetchProjects();
@@ -21,13 +22,14 @@ export default function Home() {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName || !newSector) return;
+    if (!newName || !newSector || !newProblemStatement) return;
     
-    const project = await addProject(newName, newSector);
+    const project = await addProject(newName, newSector, newProblemStatement);
     if (project) {
       toast.success('Project created!');
       setNewName('');
       setNewSector('');
+      setNewProblemStatement('');
       setIsCreating(false);
     }
   };
@@ -50,28 +52,43 @@ export default function Home() {
       {isCreating && (
         <Card className="border-indigo-100 bg-indigo-50/30 animate-in fade-in slide-in-from-top-4">
           <CardContent className="p-6">
-            <form onSubmit={handleCreateProject} className="flex flex-wrap gap-4 items-end">
-              <div className="flex-1 min-w-[200px] space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-indigo-400">Project Name</label>
+            <form onSubmit={handleCreateProject} className="space-y-4">
+              <div className="flex flex-wrap gap-4 items-end">
+                <div className="flex-1 min-w-[200px] space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-indigo-400">Project Name</label>
+                  <Input 
+                    placeholder="e.g. HealthTech Discovery 2024" 
+                    value={newName} 
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="bg-white border-indigo-200"
+                  />
+                </div>
+                <div className="flex-1 min-w-[200px] space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-wider text-indigo-400">Sector</label>
+                  <Input 
+                    placeholder="e.g. Healthcare, Fintech, Edtech" 
+                    value={newSector} 
+                    onChange={(e) => setNewSector(e.target.value)}
+                    className="bg-white border-indigo-200"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-indigo-400">Core Problem Statement</label>
                 <Input 
-                  placeholder="e.g. HealthTech Discovery 2024" 
-                  value={newName} 
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="bg-white border-indigo-200"
+                  placeholder="What is the main challenge or goal of this research project?" 
+                  value={newProblemStatement} 
+                  onChange={(e) => setNewProblemStatement(e.target.value)}
+                  className="bg-white border-indigo-200 h-12"
                 />
               </div>
-              <div className="flex-1 min-w-[200px] space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-indigo-400">Sector</label>
-                <Input 
-                  placeholder="e.g. Healthcare, Fintech, Edtech" 
-                  value={newSector} 
-                  onChange={(e) => setNewSector(e.target.value)}
-                  className="bg-white border-indigo-200"
-                />
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={!newName || !newSector || !newProblemStatement} className="bg-indigo-600 h-12 px-8">
+                  Create Project
+                </Button>
               </div>
-              <Button type="submit" disabled={!newName || !newSector} className="bg-indigo-600">
-                Create Project
-              </Button>
             </form>
           </CardContent>
         </Card>

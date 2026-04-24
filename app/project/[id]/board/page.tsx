@@ -138,7 +138,7 @@ export default function ProjectBoardPage() {
 
       {/* Board Content */}
       <div className="flex-1 overflow-hidden">
-        <BoardContent />
+        <BoardContent problemStatement={project?.problem_statement} />
       </div>
     </div>
   );
