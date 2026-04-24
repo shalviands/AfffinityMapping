@@ -279,7 +279,7 @@ export default function ProjectPage() {
                         </Badge>
                         <p className="text-[10px] text-slate-400 uppercase">{new Date(session.created_at).toLocaleDateString()}</p>
                       </div>
-                      <Link href={`/session/${session.id}/board`}>
+                      <Link href={`/project/${projectId}/board`}>
                         <Button variant="ghost" size="icon" className="group-hover:bg-indigo-50 group-hover:text-indigo-600">
                           <ArrowRight className="w-5 h-5" />
                         </Button>

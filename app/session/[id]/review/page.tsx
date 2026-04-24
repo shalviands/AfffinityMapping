@@ -21,9 +21,13 @@ export default function ReviewPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [editSpeaker, setEditSpeaker] = useState('');
+  const [project_id, setProjectId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchSession = async () => {
+      const { data: sData } = await supabase.from('sessions').select('project_id').eq('id', sessionId).single();
+      if (sData) setProjectId((sData as any).project_id);
+
       const { data, error } = await supabase
         .from('extracted_cards')
         .select('*')
@@ -33,8 +37,8 @@ export default function ReviewPage() {
         setCards(data);
       }
     };
-    if (cards.length === 0) fetchCards();
-  }, [sessionId, cards.length, setCards, supabase]);
+    fetchSession();
+  }, [sessionId, setCards, supabase]);
 
   const handleConfirmAll = async () => {
     setLoading(true);
@@ -66,11 +70,11 @@ export default function ReviewPage() {
       
       toast.success('Cards confirmed! Triggering clustering...');
       
-      // 5. Trigger clustering via API
+      // 5. Trigger clustering via API (Project-wide)
       const clusterRes = await fetch('/api/ai/cluster', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ projectId: project_id }),
       });
 
       if (!clusterRes.ok) {
@@ -78,7 +82,7 @@ export default function ReviewPage() {
         throw new Error(err.error || 'Clustering failed');
       }
 
-      router.push(`/session/${sessionId}/board`);
+      router.push(`/project/${project_id}/board`);
     } catch (error: any) {
       console.error('Confirmation Error:', error);
       toast.error(error.message || 'Failed to confirm cards');
