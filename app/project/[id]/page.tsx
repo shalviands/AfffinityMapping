@@ -205,24 +205,24 @@ export default function ProjectPage() {
               <Card key={session.id} className="hover:border-indigo-200 transition-all group overflow-hidden">
                 <CardContent className="p-0 flex items-stretch">
                   <div className="w-2 bg-indigo-500 group-hover:w-3 transition-all" />
-                  <div className="flex-1 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                  <div className="flex-1 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 min-w-0">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                           {session.stakeholder_name}
                         </h3>
-                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-indigo-600" onClick={() => handleEditSession(session)}>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-indigo-600" onClick={(e) => { e.preventDefault(); handleEditSession(session); }}>
                             <Edit2 className="w-4 h-4" />
                           </Button>
                           
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400">
+                              <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400" onClick={(e) => e.preventDefault()}>
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start">
+                            <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => router.push(`/session/${session.id}/paste`)}>
                                 <FileText className="w-4 h-4 mr-2" /> Edit/Paste Transcript
                               </DropdownMenuItem>
@@ -240,7 +240,7 @@ export default function ProjectPage() {
                           </DropdownMenu>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-500">{session.stakeholder_role} • {session.interview_method}</p>
+                      <p className="text-sm text-slate-500 truncate">{session.stakeholder_role} • {session.interview_method}</p>
                     </div>
                     
                     <div className="flex items-center gap-4">

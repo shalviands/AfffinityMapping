@@ -49,14 +49,38 @@ export default function PastePage() {
 
     setLoading(true);
     try {
-      const { error } = await (supabase.from('transcripts') as any)
-        .upsert({
-          session_id: sessionId,
-          transcript_text: text,
-          source: 'text_paste',
-          processing_engine: 'manual',
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'session_id' });
+      // First check if a transcript exists
+      const { data: existing } = await supabase
+        .from('transcripts')
+        .select('id')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      let error;
+      if (existing && existing.length > 0) {
+        // Update existing
+        const { error: updateError } = await (supabase
+          .from('transcripts') as any)
+          .update({
+            transcript_text: text,
+            source: 'text_paste',
+            processing_engine: 'manual'
+          })
+          .eq('id', (existing[0] as any).id);
+        error = updateError;
+      } else {
+        // Insert new
+        const { error: insertError } = await supabase
+          .from('transcripts')
+          .insert({
+            session_id: sessionId,
+            transcript_text: text,
+            source: 'text_paste',
+            processing_engine: 'manual'
+          } as any);
+        error = insertError;
+      }
 
       if (error) throw error;
 
