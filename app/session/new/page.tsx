@@ -35,7 +35,10 @@ function NewSessionContent() {
         const { data } = await supabase.from('projects').select('*').eq('id', projectId).single();
         if (data) {
           setProject(data);
-          updateFormData({ sector: (data as any).sector });
+          updateFormData({ 
+            sector: (data as any).sector,
+            research_question: (data as any).problem_statement || ''
+          });
         }
       };
       fetchProject();

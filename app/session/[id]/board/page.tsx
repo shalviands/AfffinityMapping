@@ -6,9 +6,10 @@ import { createClient } from '@/lib/supabase/client';
 import { useBoardStore, Cluster } from '@/store/useBoardStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, LayoutGrid, List, Sparkles, Share2, Download, Undo2, HelpCircle } from 'lucide-react';
+import { Plus, LayoutGrid, List, Sparkles, Share2, Download, Undo2, HelpCircle, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import { BoardContent } from '@/components/board/BoardContent';
 
 export default function BoardPage() {
@@ -18,8 +19,9 @@ export default function BoardPage() {
   const { 
     clusters, setClusters, hydrate, setSessionId, 
     moveCard, renameCluster, addCluster, clusterBoard,
-    isClustering, clusteringError, undo, toggleGuided, isGuided
+    isClustering, clusteringError, undo, toggleGuided, isGuided 
   } = useBoardStore();
+  const router = useRouter();
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [session, setSession] = useState<any>(null);
@@ -30,7 +32,7 @@ export default function BoardPage() {
     // Initial fetch
     const fetchBoard = async () => {
       // Fetch session for research question
-      const { data: sData } = await supabase.from('sessions').select('research_question').eq('id', sessionId).single();
+      const { data: sData } = await supabase.from('sessions').select('research_question, project_id').eq('id', sessionId).single();
       setSession(sData);
 
       const { data, error } = await supabase
@@ -75,12 +77,32 @@ export default function BoardPage() {
     });
   };
 
+  const handleEditResearchQuestion = async () => {
+    const newQuestion = prompt('Edit session research question:', session?.research_question);
+    if (newQuestion === null) return;
+    
+    const { error } = await (supabase
+      .from('sessions') as any)
+      .update({ research_question: newQuestion })
+      .eq('id', sessionId);
+
+    if (error) {
+      toast.error('Failed to update research question');
+    } else {
+      toast.success('Research question updated');
+      setSession({ ...session, research_question: newQuestion });
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden">
       {/* Header */}
       <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">I</div>
+          <Button variant="ghost" onClick={() => router.push(`/project/${session?.project_id}`)}>
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Project
+          </Button>
           <div>
             <h1 className="font-bold text-slate-900 leading-none mb-1">Affinity Board</h1>
             <p className="text-xs text-slate-400 font-mono">{sessionId}</p>
@@ -130,7 +152,7 @@ export default function BoardPage() {
       </header>
 
       {/* Main Board Area */}
-      <BoardContent problemStatement={session?.research_question} />
+      <BoardContent problemStatement={session?.research_question} onEditProblem={handleEditResearchQuestion} />
     </div>
   );
 }
