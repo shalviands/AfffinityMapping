@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Fetch session context
     const { data: session, error: sessionError } = await supabase
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     let result;
     if (type === 'jtbd') {
-      const prompt = buildJTBDPrompt(clusters, session.sector);
+      const prompt = buildJTBDPrompt(clusters, (session as any).sector);
       const aiRes = await callAI({
         systemPrompt: ANALYSIS_SYSTEM_PROMPT,
         userPrompt: prompt,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       });
       result = aiRes.data;
     } else if (type === 'leancanvas') {
-      const prompt = buildLeanCanvasPrompt(clusters, session.sector, session.stage);
+      const prompt = buildLeanCanvasPrompt(clusters, (session as any).sector, (session as any).stage);
       const aiRes = await callAI({
         systemPrompt: ANALYSIS_SYSTEM_PROMPT,
         userPrompt: prompt,

@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useBoardStore } from '@/store/useBoardStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { FileJson, FileText, Layout, ArrowLeft, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { FileJson, FileText, Layout, ArrowLeft, Download, ExternalLink, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -94,7 +94,7 @@ export default function ExportPage() {
                Generate PDF Summary
             </Button>
           </CardContent>
-        </div>
+        </Card>
 
         <div className="p-8 bg-indigo-900 rounded-3xl text-white space-y-6 relative overflow-hidden">
            <div className="absolute top-0 right-0 p-8 opacity-10">

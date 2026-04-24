@@ -34,7 +34,7 @@ export default function BoardPage() {
         .single();
       
       if (data) {
-        hydrate(data.clusters as Cluster[]);
+        hydrate((data as any).clusters as Cluster[]);
       } else if (error && error.code !== 'PGRST116') {
          console.error('Fetch board error:', error);
       }

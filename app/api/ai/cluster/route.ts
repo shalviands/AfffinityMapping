@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Fetch session context
     const { data: session, error: sessionError } = await supabase
@@ -38,9 +38,9 @@ export async function POST(req: NextRequest) {
     // Call AI for clustering
     const userPrompt = buildClusteringPrompt(
       cards,
-      session.research_question,
-      session.sector,
-      session.stage
+      (session as any).research_question,
+      (session as any).sector,
+      (session as any).stage
     );
 
     const { data: result, modelUsed } = await callAI({
@@ -58,9 +58,8 @@ export async function POST(req: NextRequest) {
       last_edited_at: new Date().toISOString()
     };
 
-    const { error: upsertError } = await supabase
-      .from('boards')
-      .upsert(boardData, { onConflict: 'session_id' });
+    const { error: upsertError } = await (supabase.from('boards') as any)
+      .upsert(boardData as any, { onConflict: 'session_id' });
 
     if (upsertError) {
       console.error('Upsert board error:', upsertError);

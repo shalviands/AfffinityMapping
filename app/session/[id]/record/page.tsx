@@ -79,7 +79,7 @@ export default function RecordPage() {
           transcript_text: transcriptLocal,
           source: 'live_recording',
           processing_engine: 'webspeech'
-        });
+        } as any);
 
       if (error) throw error;
 

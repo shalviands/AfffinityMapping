@@ -24,8 +24,7 @@ export default function NewSessionPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase
-        .from('sessions')
+      const { data, error } = await (supabase.from('sessions') as any)
         .insert({
           name: formData.name || `Session ${new Date().toLocaleDateString()}`,
           stakeholder_name: formData.stakeholder_name,
@@ -39,13 +38,13 @@ export default function NewSessionPage() {
           sorting_mode: formData.sorting_mode,
           guided_mode: formData.guided_mode,
           status: 'created'
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
 
-      setSession(data);
+      setSession(data as any);
       toast.success('Session created successfully!');
       router.push(`/session/${data.id}/record`);
     } catch (error: any) {

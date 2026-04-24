@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch session context from Supabase
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: session, error: sessionError } = await supabase
       .from('sessions')
       .select('research_question, sector, stage')
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     // Call AI for extraction
     const userPrompt = buildExtractionPrompt(
       transcript,
-      session.research_question,
-      session.sector,
-      session.stage
+      (session as any).research_question,
+      (session as any).sector,
+      (session as any).stage
     );
 
     const { data, modelUsed } = await callAI({
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       theme: card.theme || null,
     }));
 
-    const { error: insertError } = await supabase.from('extracted_cards').insert(cardsToInsert);
+    const { error: insertError } = await (supabase.from('extracted_cards') as any).insert(cardsToInsert as any);
     
     if (insertError) {
       console.error('Insert cards error:', insertError);

@@ -52,10 +52,10 @@ export default function ReviewPage() {
         reviewed: true
       }));
 
-      const { error } = await supabase.from('confirmed_cards').insert(confirmedCards);
+      const { error } = await supabase.from('confirmed_cards').insert(confirmedCards as any);
       if (error) throw error;
 
-      await supabase.from('sessions').update({ status: 'board' }).eq('id', sessionId);
+      await (supabase.from('sessions') as any).update({ status: 'board' }).eq('id', sessionId);
       
       toast.success('Cards confirmed! Triggering clustering...');
       
@@ -155,7 +155,7 @@ export default function ReviewPage() {
                           {card.insight}
                         </p>
                         <blockquote className="text-sm text-slate-500 border-l-2 border-slate-200 pl-4 italic">
-                          "{card.quote}"
+                          &quot;{card.quote}&quot;
                         </blockquote>
                       </div>
                     )}

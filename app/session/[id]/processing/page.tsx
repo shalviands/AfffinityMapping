@@ -50,7 +50,7 @@ export default function ProcessingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             sessionId, 
-            transcript: transcriptData.transcript_text 
+            transcript: (transcriptData as any).transcript_text 
           }),
         });
 
@@ -65,7 +65,7 @@ export default function ProcessingPage() {
         setCards(cards);
         
         // 3. Update session status
-        await supabase.from('sessions').update({ status: 'review' }).eq('id', sessionId);
+        await (supabase.from('sessions') as any).update({ status: 'review' }).eq('id', sessionId);
         
         setIsProcessing(false);
         toast.success('Extraction complete!');

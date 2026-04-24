@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const fileName = `${sessionId}/${Date.now()}-${file.name}`;
 
     // Upload to Supabase Storage

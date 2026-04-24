@@ -50,8 +50,7 @@ const persistToSupabase = (sessionId: string, clusters: Cluster[]) => {
   clearTimeout(writeTimeout);
   writeTimeout = setTimeout(async () => {
     const supabase = createClient();
-    const { error } = await supabase
-      .from('boards')
+    const { error } = await (supabase.from('boards') as any)
       .update({ clusters, last_edited_at: new Date().toISOString() })
       .eq('session_id', sessionId);
     
@@ -127,7 +126,7 @@ export const useBoardStore = create<BoardState>()(
         const clusterToDelete = currentClusters.find(c => c.id === clusterId);
         if (!clusterToDelete) return;
 
-        let clusters = currentClusters.filter(c => c.id !== clusterId);
+        const clusters = currentClusters.filter(c => c.id !== clusterId);
         const unclustered = clusters.find(c => c.isUnc || c.id === 'unclustered');
         
         if (unclustered) {
@@ -164,18 +163,17 @@ export const useBoardStore = create<BoardState>()(
             throw new Error(err.error || 'Clustering failed');
           }
 
-          const { clusters: aiClusters } = await response.json();
+          await response.json();
           // The board API already updates Supabase, so we just need to hydrate local state
           // But usually we want to fetch the latest state from Supabase to be sure
           const supabase = createClient();
-          const { data } = await supabase
-            .from('boards')
+          const { data } = await (supabase.from('boards') as any)
             .select('clusters')
             .eq('session_id', sessionId)
             .single();
 
           if (data) {
-            set({ clusters: data.clusters as Cluster[] });
+            set({ clusters: (data as any).clusters as Cluster[] });
           }
         } catch (error: any) {
           set({ clusteringError: error.message });

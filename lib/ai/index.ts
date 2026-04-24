@@ -114,10 +114,11 @@ export async function callAI({
 
       return { data: rawText, modelUsed };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as any;
       clearTimeout(timeoutId);
       
-      if (error.name === 'AbortError') {
+      if (err.name === 'AbortError') {
         if (attempt < maxRetries) continue;
         throw new AIError('Request timed out after multiple attempts.', 408);
       }
@@ -159,7 +160,7 @@ function validateInsights(input: any) {
 function safeParseJSON(text: string) {
   if (!text) throw new AIError('Empty AI response', 422);
 
-  let clean = text
+  const clean = text
     .replace(/```json/gi, '')
     .replace(/```/g, '')
     .trim();
@@ -177,7 +178,9 @@ function safeParseJSON(text: string) {
           if (clean[firstCharIndex] === '{' && objectMatch) return JSON.parse(objectMatch[0]);
           if (clean[firstCharIndex] === '[' && arrayMatch) return JSON.parse(arrayMatch[0]);
         }
-        return JSON.parse(objectMatch ? objectMatch[0] : arrayMatch[0]);
+        if (objectMatch) return JSON.parse(objectMatch[0]);
+        if (arrayMatch) return JSON.parse(arrayMatch[0]);
+        throw new Error('No match');
       } catch (innerE) {}
     }
 

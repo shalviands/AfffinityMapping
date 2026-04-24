@@ -16,23 +16,28 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await audioFile.arrayBuffer());
 
     // 1. Transcribe
-    const { transcript, engine, error } = await transcribeWithBhashini(buffer, language);
+    const result = await transcribeWithBhashini(buffer, language);
+
+    if (!result) {
+      return NextResponse.json({ error: 'Transcription failed - no result' }, { status: 500 });
+    }
+
+    const { transcript, engine, error } = result as any;
 
     if (error) {
       return NextResponse.json({ error }, { status: 500 });
     }
 
     // 2. Store transcript in DB
-    const supabase = createClient();
-    const { error: dbError } = await supabase
-      .from('transcripts')
+    const supabase = await createClient();
+    const { error: dbError } = await (supabase.from('transcripts') as any)
       .insert({
         session_id: sessionId,
         transcript_text: transcript,
         source: 'file_upload',
         processing_engine: engine,
         language
-      });
+      } as any);
 
     if (dbError) {
       console.error('Database error storing transcript:', dbError);

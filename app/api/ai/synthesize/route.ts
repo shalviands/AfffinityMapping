@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Fetch session context
     const { data: session, error: sessionError } = await supabase
@@ -28,10 +28,10 @@ export async function POST(req: NextRequest) {
     const userPrompt = buildSynthesisPrompt(
       clusterName,
       cards,
-      session.research_question,
-      session.sector,
-      session.stage,
-      session.round_number || 1,
+      (session as any).research_question,
+      (session as any).sector,
+      (session as any).stage,
+      (session as any).round_number || 1,
       10 // Default total sessions context
     );
 

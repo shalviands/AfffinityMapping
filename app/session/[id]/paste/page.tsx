@@ -33,7 +33,7 @@ export default function PastePage() {
           transcript_text: text,
           source: 'text_paste',
           processing_engine: 'manual'
-        });
+        } as any);
 
       if (error) throw error;
 

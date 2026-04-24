@@ -58,7 +58,7 @@ export async function transcribeWithGroqWhisper(audioBuffer: Buffer, language = 
   }
 
   const formData = new FormData();
-  const file = new Blob([audioBuffer], { type: 'audio/wav' });
+  const file = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/wav' });
   formData.append('file', file, 'audio.wav');
   formData.append('model', 'whisper-large-v3-turbo'); 
   formData.append('language', language);
@@ -91,7 +91,7 @@ async function transcribeWithWhisper(audioBuffer: Buffer, language = 'hi') {
   if (!whisperKey) throw new Error('Whisper fallback requires OPENAI_API_KEY');
 
   const formData = new FormData();
-  const file = new Blob([audioBuffer], { type: 'audio/wav' });
+  const file = new Blob([new Uint8Array(audioBuffer)], { type: 'audio/wav' });
   formData.append('file', file, 'audio.wav');
   formData.append('model', 'whisper-1');
   formData.append('language', language); 
