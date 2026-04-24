@@ -6,8 +6,9 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2 } from 'lucide-react';
+import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2, Edit2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function ProjectPage() {
   const params = useParams();
@@ -20,35 +21,65 @@ export default function ProjectPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch project
-        const { data: pData, error: pError } = await supabase.from('projects').select('*').eq('id', projectId).single();
-        
-        if (pError || !pData) {
-          setError('Project not found or you don’t have access.');
-          setLoading(false);
-          return;
-        }
-        
-        setProject(pData);
-
-        // Fetch sessions
-        const { data: sData } = await supabase.from('sessions').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
-        setSessions(sData || []);
-        setError(null);
-      } catch (err: any) {
-        console.error('Data fetch error:', err);
-        setError(err.message || 'An unexpected error occurred.');
-      } finally {
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch project
+      const { data: pData, error: pError } = await supabase.from('projects').select('*').eq('id', projectId).single();
+      
+      if (pError || !pData) {
+        setError('Project not found or you don’t have access.');
         setLoading(false);
+        return;
       }
-    };
+      
+      setProject(pData);
 
+      // Fetch sessions
+      const { data: sData } = await supabase.from('sessions').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+      setSessions(sData || []);
+      setError(null);
+    } catch (err: any) {
+      console.error('Data fetch error:', err);
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [projectId, supabase]);
+
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!confirm('Are you sure you want to delete this stakeholder session? All transcripts and board data for this person will be lost.')) return;
+
+    const { error } = await supabase.from('sessions').delete().eq('id', sessionId);
+    if (error) {
+      toast.error('Failed to delete session');
+    } else {
+      toast.success('Session deleted');
+      setSessions(sessions.filter(s => s.id !== sessionId));
+    }
+  };
+
+  const handleEditSession = async (session: any) => {
+    const newName = prompt('Enter new stakeholder name:', session.stakeholder_name);
+    if (!newName) return;
+    const newRole = prompt('Enter new stakeholder role:', session.stakeholder_role);
+    
+    const { error } = await supabase
+      .from('sessions')
+      .update({ stakeholder_name: newName, stakeholder_role: newRole })
+      .eq('id', session.id);
+
+    if (error) {
+      toast.error('Failed to update session');
+    } else {
+      toast.success('Session updated');
+      fetchData();
+    }
+  };
 
   if (loading) {
     return (
@@ -123,9 +154,19 @@ export default function ProjectPage() {
                   <div className="w-2 bg-indigo-500 group-hover:w-3 transition-all" />
                   <div className="flex-1 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                        {session.stakeholder_name}
-                      </h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                          {session.stakeholder_name}
+                        </h3>
+                        <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-indigo-600" onClick={() => handleEditSession(session)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-red-500" onClick={() => handleDeleteSession(session.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                       <p className="text-sm text-slate-500">{session.stakeholder_role} • {session.interview_method}</p>
                     </div>
                     
