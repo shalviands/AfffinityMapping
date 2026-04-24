@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useBoardStore, Cluster } from '@/store/useBoardStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, LayoutGrid, List, Sparkles, Share2, Download } from 'lucide-react';
+import { Plus, LayoutGrid, List, Sparkles, Share2, Download, Undo2, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { BoardContent } from '@/components/board/BoardContent';
@@ -18,7 +18,7 @@ export default function BoardPage() {
   const { 
     clusters, setClusters, hydrate, setSessionId, 
     moveCard, renameCluster, addCluster, clusterBoard,
-    isClustering, clusteringError 
+    isClustering, clusteringError, undo, toggleGuided, isGuided
   } = useBoardStore();
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -82,7 +82,7 @@ export default function BoardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <div className="bg-slate-100 p-1 rounded-lg flex mr-4">
              <Button 
                variant="ghost" 
@@ -102,17 +102,24 @@ export default function BoardPage() {
              </Button>
           </div>
 
+          <Button variant="ghost" size="sm" onClick={undo} className="text-slate-500 hover:text-indigo-600">
+             <Undo2 className="w-4 h-4 mr-2" />
+             Undo
+          </Button>
+
+          <Button 
+            variant={isGuided ? "default" : "outline"} 
+            size="sm" 
+            onClick={toggleGuided}
+            className={isGuided ? "bg-indigo-600" : ""}
+          >
+             <HelpCircle className="w-4 h-4 mr-2" />
+             {isGuided ? "Guided: ON" : "Guided Mode"}
+          </Button>
+
           <Button variant="outline" size="sm" onClick={handleManualCluster} disabled={isClustering}>
              <Sparkles className={`w-4 h-4 mr-2 text-indigo-600 ${isClustering ? 'animate-spin' : ''}`} />
              AI Re-cluster
-          </Button>
-          <Button variant="outline" size="sm">
-             <Share2 className="w-4 h-4 mr-2" />
-             Share
-          </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700" size="sm">
-             <Download className="w-4 h-4 mr-2" />
-             Export
           </Button>
         </div>
       </header>

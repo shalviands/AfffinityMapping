@@ -32,11 +32,15 @@ interface BoardState {
   clusters: Cluster[];
   isClustering: boolean;
   clusteringError: string | null;
+  isGuided: boolean;
+  history: Cluster[][];
   
   setSessionId: (id: string | null) => void;
   setProjectId: (id: string | null) => void;
   setClusters: (clusters: Cluster[]) => void;
   hydrate: (clusters: Cluster[]) => void;
+  toggleGuided: () => void;
+  undo: () => void;
   
   moveCard: (cardId: string, fromClusterId: string, toClusterId: string) => void;
   renameCluster: (clusterId: string, name: string) => void;
@@ -48,6 +52,12 @@ interface BoardState {
 }
 
 let writeTimeout: NodeJS.Timeout;
+
+const pushToHistory = (set: any, get: any) => {
+  const { clusters, history } = get();
+  const newHistory = [JSON.parse(JSON.stringify(clusters)), ...history].slice(0, 20);
+  set({ history: newHistory });
+};
 
 const persistToSupabase = (id: string, type: 'session' | 'project', clusters: Cluster[]) => {
   clearTimeout(writeTimeout);
@@ -72,11 +82,14 @@ export const useBoardStore = create<BoardState>()(
       clusters: [],
       isClustering: false,
       clusteringError: null,
+      isGuided: true,
+      history: [],
 
       setSessionId: (id) => set({ sessionId: id, projectId: null }),
       setProjectId: (id) => set({ projectId: id, sessionId: null }),
 
       setClusters: (clusters) => {
+        pushToHistory(set, get);
         set({ clusters });
         const { sessionId, projectId } = get();
         if (sessionId) persistToSupabase(sessionId, 'session', clusters);
@@ -85,6 +98,19 @@ export const useBoardStore = create<BoardState>()(
 
       hydrate: (clusters) => set({ clusters }),
 
+      toggleGuided: () => set({ isGuided: !get().isGuided }),
+
+      undo: () => {
+        const { history, sessionId, projectId } = get();
+        if (history.length === 0) return;
+        
+        const [previous, ...remaining] = history;
+        set({ clusters: previous, history: remaining });
+        
+        if (sessionId) persistToSupabase(sessionId, 'session', previous);
+        else if (projectId) persistToSupabase(projectId, 'project', previous);
+      },
+
       syncBoard: async () => {
         const { sessionId, projectId, clusters } = get();
         if (sessionId) persistToSupabase(sessionId, 'session', clusters);
@@ -92,6 +118,7 @@ export const useBoardStore = create<BoardState>()(
       },
 
       moveCard: (cardId, fromClusterId, toClusterId) => {
+        pushToHistory(set, get);
         const clusters = [...get().clusters];
         const fromCluster = clusters.find(c => c.id === fromClusterId);
         const toCluster = clusters.find(c => c.id === toClusterId);
@@ -114,6 +141,7 @@ export const useBoardStore = create<BoardState>()(
       },
 
       renameCluster: (clusterId, name) => {
+        pushToHistory(set, get);
         const clusters = get().clusters.map(c => 
           c.id === clusterId ? { ...c, name } : c
         );
@@ -124,6 +152,7 @@ export const useBoardStore = create<BoardState>()(
       },
 
       addCluster: () => {
+        pushToHistory(set, get);
         const newCluster: Cluster = {
           id: `cluster-${Date.now()}`,
           name: 'New Cluster',
@@ -140,6 +169,7 @@ export const useBoardStore = create<BoardState>()(
       },
 
       deleteCluster: (clusterId) => {
+        pushToHistory(set, get);
         const currentClusters = get().clusters;
         const clusterToDelete = currentClusters.find(c => c.id === clusterId);
         if (!clusterToDelete) return;
@@ -169,6 +199,7 @@ export const useBoardStore = create<BoardState>()(
       },
 
       clusterBoard: async (id, type) => {
+        pushToHistory(set, get);
         set({ isClustering: true, clusteringError: null });
         try {
           const body = type === 'session' ? { sessionId: id } : { projectId: id };

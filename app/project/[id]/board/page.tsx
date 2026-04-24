@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useBoardStore, Cluster } from '@/store/useBoardStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Sparkles, Loader2, Download, Save } from 'lucide-react';
+import { ArrowLeft, Sparkles, Loader2, Download, Save, Undo2, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BoardContent } from '@/components/board/BoardContent';
 
@@ -15,7 +15,7 @@ export default function ProjectBoardPage() {
   const router = useRouter();
   const projectId = params.id as string;
   const supabase = createClient();
-  const { hydrate, setProjectId } = useBoardStore();
+  const { hydrate, setProjectId, undo, toggleGuided, isGuided } = useBoardStore();
 
   const [loading, setLoading] = useState(true);
   const [clustering, setClustering] = useState(false);
@@ -106,6 +106,21 @@ export default function ProjectBoardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={undo} className="text-slate-500 hover:text-indigo-600">
+             <Undo2 className="w-4 h-4 mr-2" />
+             Undo
+          </Button>
+
+          <Button 
+            variant={isGuided ? "default" : "outline"} 
+            size="sm" 
+            onClick={toggleGuided}
+            className={isGuided ? "bg-indigo-600" : ""}
+          >
+             <HelpCircle className="w-4 h-4 mr-2" />
+             {isGuided ? "Guided: ON" : "Guided Mode"}
+          </Button>
+
           <Button 
             variant="outline" 
             className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
