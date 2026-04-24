@@ -7,7 +7,7 @@ import { useSessionStore } from '@/store/useSessionStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, Trash2, Edit3, Save, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, X, Trash2, Edit3, Save, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ReviewPage() {
@@ -106,6 +106,13 @@ export default function ReviewPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-12 px-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Card Review</h1>

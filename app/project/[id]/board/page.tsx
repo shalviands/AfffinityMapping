@@ -15,7 +15,7 @@ export default function ProjectBoardPage() {
   const router = useRouter();
   const projectId = params.id as string;
   const supabase = createClient();
-  const { hydrate, syncBoard } = useBoardStore();
+  const { hydrate, setProjectId } = useBoardStore();
 
   const [loading, setLoading] = useState(true);
   const [clustering, setClustering] = useState(false);
@@ -23,25 +23,37 @@ export default function ProjectBoardPage() {
 
   useEffect(() => {
     const fetchBoard = async () => {
-      // Fetch project
-      const { data: pData } = await supabase.from('projects').select('*').eq('id', projectId).single();
-      setProject(pData);
+      setProjectId(projectId);
+      setLoading(true);
+      try {
+        // Fetch project
+        const { data: pData } = await supabase.from('projects').select('*').eq('id', projectId).single();
+        setProject(pData);
 
-      // Fetch project board
-      const { data, error } = await supabase
-        .from('boards')
-        .select('clusters')
-        .eq('project_id', projectId)
-        .single();
-      
-      if (data) {
-        hydrate((data as any).clusters as Cluster[]);
+        // Fetch project board
+        const { data, error } = await supabase
+          .from('boards')
+          .select('clusters')
+          .eq('project_id', projectId)
+          .single();
+        
+        if (data) {
+          hydrate((data as any).clusters as Cluster[]);
+        } else {
+          // If no board exists, initialize empty
+          hydrate([]);
+          // Create the board record in background
+          await (supabase.from('boards') as any).upsert({ project_id: projectId, clusters: [] }, { onConflict: 'project_id' });
+        }
+      } catch (err) {
+        console.error('Fetch board error:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     
     fetchBoard();
-  }, [projectId, hydrate, supabase]);
+  }, [projectId, hydrate, supabase, setProjectId]);
 
   const handleClustering = async () => {
     setClustering(true);

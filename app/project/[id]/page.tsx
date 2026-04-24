@@ -18,18 +18,33 @@ export default function ProjectPage() {
   const [project, setProject] = useState<any>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch project
-      const { data: pData } = await supabase.from('projects').select('*').eq('id', projectId).single();
-      setProject(pData);
+      try {
+        setLoading(true);
+        // Fetch project
+        const { data: pData, error: pError } = await supabase.from('projects').select('*').eq('id', projectId).single();
+        
+        if (pError || !pData) {
+          setError('Project not found or you don’t have access.');
+          setLoading(false);
+          return;
+        }
+        
+        setProject(pData);
 
-      // Fetch sessions
-      const { data: sData } = await supabase.from('sessions').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
-      setSessions(sData || []);
-      
-      setLoading(false);
+        // Fetch sessions
+        const { data: sData } = await supabase.from('sessions').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
+        setSessions(sData || []);
+        setError(null);
+      } catch (err: any) {
+        console.error('Data fetch error:', err);
+        setError(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
@@ -44,7 +59,17 @@ export default function ProjectPage() {
     );
   }
 
-  if (!project) return <div>Project not found</div>;
+  if (error || !project) {
+    return (
+      <div className="max-w-2xl mx-auto px-6 py-24 text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-50 text-red-600">
+          <ArrowLeft className="w-10 h-10" />
+        </div>
+        <h1 className="text-2xl font-bold text-slate-900">{error || 'Project not found'}</h1>
+        <Button onClick={() => router.push('/')}>Back to Hub</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 space-y-8">

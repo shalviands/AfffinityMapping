@@ -86,7 +86,8 @@ export async function callAI({
       }
 
       if (!response.ok) {
-        const err = await response.json();
+        const err = await response.json().catch(() => ({}));
+        console.error('OpenRouter Error:', err);
         throw new AIError(err?.error?.message || 'OpenRouter API error', response.status);
       }
 

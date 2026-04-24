@@ -18,6 +18,11 @@ export async function transcribeWithBhashini(audioBuffer: Buffer, languageCode =
     },
   };
 
+  if (!BHASHINI_CONFIG.apiKey || !BHASHINI_CONFIG.userId) {
+    console.log('Bhashini credentials missing, falling back to Groq/Whisper');
+    return transcribeWithGroqWhisper(audioBuffer, languageCode);
+  }
+
   try {
     const response = await fetch(`${BHASHINI_CONFIG.baseUrl}/services/inference/pipeline`, {
       method: 'POST',
@@ -31,6 +36,8 @@ export async function transcribeWithBhashini(audioBuffer: Buffer, languageCode =
     });
 
     if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn('Bhashini API error:', errorData);
         return transcribeWithGroqWhisper(audioBuffer, languageCode);
     }
 

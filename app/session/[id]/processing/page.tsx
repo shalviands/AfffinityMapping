@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useSessionStore } from '@/store/useSessionStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle2, Sparkles, ArrowRight, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, Sparkles, ArrowRight, AlertCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProcessingPage() {
@@ -86,7 +86,14 @@ export default function ProcessingPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-24 px-6">
+    <div className="max-w-2xl mx-auto py-12 px-6">
+      <div className="mb-8 flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <div className="text-center space-y-6 mb-12">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-indigo-50 text-indigo-600 mb-4">
           {isProcessing ? (

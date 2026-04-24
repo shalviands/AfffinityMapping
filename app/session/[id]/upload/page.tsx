@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Upload, FileAudio, Loader2, ArrowRight, X } from 'lucide-react';
+import { Upload, FileAudio, Loader2, ArrowRight, X, ArrowLeft } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 
@@ -55,6 +55,13 @@ export default function UploadPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <h1 className="text-3xl font-bold">Upload Interview Recording</h1>
       
       <Card className={`border-2 border-dashed transition-all ${

@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useSessionStore } from '@/store/useSessionStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mic, Square, Loader2, Save, Trash2, ArrowRight } from 'lucide-react';
+import { Mic, Square, Loader2, Save, Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function RecordPage() {
@@ -95,6 +95,13 @@ export default function RecordPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-slate-900">Live Recording</h1>
         <div className="flex gap-2">
