@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowRight, Info, Briefcase } from 'lucide-react';
+import { Loader2, ArrowRight, Info, Briefcase, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Suspense } from 'react';
 
@@ -208,20 +208,42 @@ function NewSessionContent() {
 
 export default function NewSessionPage() {
   return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-screen text-slate-400">
+        <Loader2 className="w-10 h-10 animate-spin mb-4" />
+        <p>Loading...</p>
+      </div>
+    }>
+      <NewSessionPageContent />
+    </Suspense>
+  );
+}
+
+function NewSessionPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
+
+  const handleBack = () => {
+    if (projectId) router.push(`/project/${projectId}`);
+    else router.push('/');
+  };
+
+  return (
     <div className="max-w-3xl mx-auto py-12 px-6">
+      <div className="flex items-center gap-4 mb-8">
+        <Button variant="ghost" size="sm" onClick={handleBack} className="text-slate-500">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <div className="mb-8 space-y-2">
         <h1 className="text-3xl font-bold text-slate-900">New Stakeholder Interview</h1>
         <p className="text-slate-600">Enter the details of your interview to start capturing insights.</p>
       </div>
 
-      <Suspense fallback={
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <Loader2 className="w-10 h-10 animate-spin mb-4" />
-          <p>Loading session form...</p>
-        </div>
-      }>
-        <NewSessionContent />
-      </Suspense>
+      <NewSessionContent />
     </div>
   );
 }
