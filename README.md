@@ -1,119 +1,36 @@
-# 🧩 INCUBX Affinity Mapping Tool
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-> **Modern Qualitative Synthesis for Rapid Stakeholder Insights.**
+## Getting Started
 
-![Hero Image](file:///e:/Antigravity/INCUBATION/Tools/Affinity%20Mapping/src/assets/hero.png)
+First, run the development server:
 
-INCUBX is a high-performance, AI-augmented affinity mapping platform designed for researchers, product managers, and mentors. It streamlines the synthesis of qualitative data—from stakeholder interviews to brainstorming sessions—by combining multilingual transcription, automated insight extraction, and a dynamic, drag-and-drop mapping canvas.
-
----
-
-## 🌟 Core Product Pillars
-
-### 🎙️ 1. Intelligent Intake & Processing
-Transform raw audio and messy transcripts into actionable insight cards in minutes.
-*   **Multilingual Support:** Native integration with **Bhashini** for transcription in 22+ regional Indian languages.
-*   **AI Extraction Pipeline:** Automated identification of pain points, quotes, and opportunities using Gemini/Claude.
-*   **Split-View Review:** Verify AI-generated cards against original transcripts with a synchronized review interface.
-
-### 🗺️ 2. Dynamic Affinity Canvas
-A zero-latency mapping environment built for heavy data loads.
-*   **Atomic Card System:** Cards carry rich metadata (sentiment, stakeholder ID, confidence, timestamps).
-*   **Intelligent Auto-Clustering:** One-click grouping of related insights with AI-generated theme titles and high-level synthesis summaries.
-*   **Conflict & Tension Panel:** Identify and resolve contradictory signals between different stakeholder groups.
-
-### 📉 3. Strategic Synthesis
-Move from "what people said" to "what we should do."
-*   **Priority Matrix:** Categorize insights using **MoSCoW** or **Value vs. Effort** frameworks directly on the board.
-*   **Longitudinal Timelines:** Track how themes evolve across multiple research sessions.
-*   **Pattern Recognition:** Cross-board analysis to find recurring themes across disparate project boards.
-
-### 🤝 4. Expert Feedback Loop
-Bridging the gap between researchers and strategic oversight.
-*   **Mentor View:** Specialized interface for mentors to provide feedback, flag cards, and offer strategic course correction.
-*   **Collaborative Export:** Generate professional research reports in PDF or CSV formats with one click.
-
----
-
-## 🏗️ Technical Architecture
-
-### ⚡ The Stack
-- **Frontend:** [React 19](https://reactjs.org/) + [Vite](https://vitejs.dev/)
-- **State:** [Zustand](https://github.com/pmndrs/zustand) (Compartmentalized stores for Board, Project, and UI)
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) (Custom design system)
-- **Interactions:** [Framer Motion](https://www.framer.com/motion/) & [@dnd-kit](https://dndkit.com/)
-- **Backend:** [Supabase](https://supabase.com/) & [Firebase](https://firebase.google.com/)
-- **AI Gateway:** [OpenRouter](https://openrouter.ai/) (Unified API for Gemini 1.5, Claude 3, and Llama 3)
-- **Language APIs:** [Bhashini](https://bhashini.gov.in/)
-
-### 📂 Directory Structure
-```text
-src/
-├── components/       # Generic UI (Buttons, Modals, Shared Layouts)
-├── config/           # App Constants (AI Models, API Endpoints, Themes)
-├── data/             # Sample datasets and fallback mock data
-├── hooks/            # Logic (useBhashini, useSpeechRecognition, useHydrate)
-├── screens/          # Core Views (Board, PriorityMatrix, MentorView, etc.)
-├── services/         # Integrations (API wrappers for AI, Bhashini, DB)
-├── store/            # Zustand state containers (Source of Truth)
-└── utils/            # Helpers (PDF export, Data normalization, Formatting)
-```
-
----
-
-## 🤖 Deep Dive: AI Pipeline
-
-The INCUBX AI engine is designed for **reliability** and **precision**:
-- **Self-Correcting JSON:** If an LLM returns malformed JSON, our service automatically attempts regex-based repair and self-correction retries.
-- **Model Fallback:** Configurable fallback logic (e.g., if Gemini exceeds rate limits, the system seamlessly switches to Claude or Llama).
-- **Context-Aware Prompting:** Prompts are dynamically injected with sector-specific knowledge and project constraints.
-
----
-
-## 🛠️ Installation & Setup
-
-### 1. Requirements
-- Node.js 18.x or higher
-- npm or pnpm
-
-### 2. Clone & Install
-```bash
-git clone https://github.com/shalviands/AfffinityMapping.git
-cd AfffinityMapping
-npm install
-```
-
-### 3. Environment Configuration
-Create a `.env` file in the root directory:
-```env
-VITE_OPENROUTER_API_KEY=your_key_here
-VITE_SUPABASE_URL=your_project_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
-VITE_BHASHINI_API_KEY=your_key_here
-```
-
-### 4. Run Development
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
----
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 🛡️ Compliance & Ethics
-INCUBX is built with data privacy as a non-negotiable requirement:
-- **DPDP Compliant:** Regional data residency and PII masking features.
-- **Source Attribution:** Every "Atomic Card" is linked back to its original source for auditability.
-- **No-AI Mode:** Option to disable AI extraction for highly sensitive projects while retaining manual mapping features.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
----
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## 📄 Documentation Links
-- [🚀 Developer Onboarding](./DEVELOPER_README.md)
-- [🤖 AI Provider Configuration](./AI_PROVIDERS_SETUP.md)
-- [🛡️ DPDP Compliance Guide](./DPDP_COMPLIANCE.md)
-- [🎨 Design System & Branding](./DESIGN_SYSTEM.md)
-- [🎧 Bhashini Integration](./BHASHINI_SETUP.md)
+## Learn More
 
----
+To learn more about Next.js, take a look at the following resources:
 
-© 2026 INCUBX Platform. Engineered for Impact.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
