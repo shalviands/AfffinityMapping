@@ -415,7 +415,7 @@ Startup stage: ${stage}
    When in doubt — set conflict: false.
 
 6. THE 100% GOAL
-   Aim for 100% coverage. Every single Card ID provided must appear in a cluster's 'cardIds' array.
+   Aim for 100% coverage. Every single Card "id" (the UUID) provided in the data must appear in a cluster's 'cardIds' array.
    Only use the 'unclustered' array as a last resort for totally isolated data points.
 
 ━━━ OUTPUT ━━━

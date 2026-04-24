@@ -89,20 +89,20 @@ export async function POST(req: NextRequest) {
     const fullClusters = result.clusters.map((cluster: any) => ({
       ...cluster,
       cards: (cluster.cardIds || [])
-        .map((id: string) => cardsData.find(c => (c.card_id || c.id) === id))
+        .map((id: string) => cardsData.find(c => c.id === id))
         .filter(Boolean)
     }));
 
     // 4. Handle unclustered cards
-    const clusteredIds = new Set(fullClusters.flatMap((c: any) => c.cards.map((card: any) => card.card_id || card.id)));
-    const unclusteredCards = cardsData.filter(c => !clusteredIds.has(c.card_id || c.id));
+    const clusteredIds = new Set(fullClusters.flatMap((c: any) => c.cards.map((card: any) => card.id)));
+    const unclusteredCards = cardsData.filter(c => !clusteredIds.has(c.id));
 
     if (unclusteredCards.length > 0) {
       fullClusters.push({
         id: 'unclustered',
         name: 'Unclustered',
         synthesis: 'Insights that do not yet fit into a clear pattern.',
-        cardIds: unclusteredCards.map(c => c.card_id || c.id),
+        cardIds: unclusteredCards.map(c => c.id),
         cards: unclusteredCards,
         isUnc: true,
         accentColor: 'slate'
