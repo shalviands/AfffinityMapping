@@ -225,16 +225,14 @@ opposing FACTUAL claims about the SAME specific subject.
 context — flag only if they describe the same scenario.
 When in doubt — do not flag. Over-flagging destroys trust in the tool.
 
-RULE 4 — LONER CARDS ARE VALID AND IMPORTANT
-Cards that do not fit any cluster go into the "unclustered" array.
-Do not force a card into a cluster to avoid having unclustered items.
-An unclustered card with a novel insight is more valuable to the founder
-than a card force-fitted into the wrong cluster.
-Aim for 5 to 15 percent of cards to be unclustered — this is healthy.
+RULE 4 — AIM FOR 100% COVERAGE
+Every card provided must be assigned to a cluster.
+Do not leave cards unclustered unless they are truly, fundamentally unrelated to anything else in the entire dataset.
+A single-card cluster is better than an unclustered card if it represents a distinct pattern or theme.
+Your goal is to organize the chaos into structure — do not leave the chaos in the 'unclustered' bucket.
 
-RULE 5 — CLUSTER SIZE MINIMUM
-Every cluster must have at least 2 cards.
-Single-card "clusters" are not clusters — move that card to unclustered.
+RULE 5 — MEANINGFUL GROUPING
+While clusters with multiple cards are preferred for showing frequency, a single-card cluster is acceptable if it contains a high-value, unique insight that deserves its own category.
 
 RULE 6 — TRUST THE CARDS YOU RECEIVE
 You are not re-extracting insights. You are working with what was captured.
@@ -405,9 +403,10 @@ Startup stage: ${stage}
    Tell the founder what to DO next — not just what the pattern says.
    2-3 sentences maximum. No hedging. No academic language.
 
-4. MINIMUM SIZE
-   Every cluster must have at least 2 cards.
-   Single-card clusters are not clusters — move that card to unclustered.
+4. MAXIMUM COVERAGE
+   Your primary objective is to cluster as many cards as possible. 
+   Do not leave cards unclustered if there is ANY thematic connection to a group.
+   Single-card clusters are acceptable and preferred over the 'unclustered' bucket.
 
 5. CONTRADICTION FLAGGING
    Set conflict: true ONLY when two cards in the cluster make directly
@@ -415,11 +414,9 @@ Startup stage: ${stage}
    Preference differences (WhatsApp vs SMS) are NOT contradictions.
    When in doubt — set conflict: false.
 
-6. LONER CARDS
-   Cards that do not fit any cluster go in "unclustered".
-   Do NOT force-fit. An unclustered novel insight is more valuable
-   than a forced cluster placement.
-   Aim for 5 to 15 percent of cards to be unclustered.
+6. THE 100% GOAL
+   Aim for 100% coverage. Every single Card ID provided must appear in a cluster's 'cardIds' array.
+   Only use the 'unclustered' array as a last resort for totally isolated data points.
 
 ━━━ OUTPUT ━━━
 

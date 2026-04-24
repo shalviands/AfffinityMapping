@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callAI } from '@/lib/ai';
 import { buildClusteringPrompt, ANALYSIS_SYSTEM_PROMPT } from '@/lib/ai/prompts';
 import { createClient } from '@/lib/supabase/server';
+import { AI_CONFIG } from '@/config/ai.config';
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,8 +80,9 @@ export async function POST(req: NextRequest) {
     const { data: result, modelUsed } = await callAI({
       systemPrompt: ANALYSIS_SYSTEM_PROMPT,
       userPrompt,
+      model: AI_CONFIG.models.clustering,
       jsonMode: true,
-      maxTokens: 4000,
+      maxTokens: 6000,
     });
 
     // 3. Map AI result back to full card objects
