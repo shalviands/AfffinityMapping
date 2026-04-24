@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { FileText, ArrowRight, Loader2 } from 'lucide-react';
+import { FileText, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function PastePage() {
@@ -17,6 +17,29 @@ export default function PastePage() {
   
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  useEffect(() => {
+    const fetchTranscript = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('transcripts')
+          .select('transcript_text')
+          .eq('session_id', sessionId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (data && (data as any[]).length > 0) {
+          setText((data as any[])[0].transcript_text);
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      } finally {
+        setFetching(false);
+      }
+    };
+    fetchTranscript();
+  }, [sessionId, supabase]);
 
   const handleSave = async () => {
     if (!text || text.length < 50) {
@@ -26,18 +49,18 @@ export default function PastePage() {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('transcripts')
-        .insert({
+      const { error } = await (supabase.from('transcripts') as any)
+        .upsert({
           session_id: sessionId,
           transcript_text: text,
           source: 'text_paste',
-          processing_engine: 'manual'
-        } as any);
+          processing_engine: 'manual',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'session_id' });
 
       if (error) throw error;
 
-      toast.success('Transcript saved!');
+      toast.success('Transcript updated!');
       router.push(`/session/${sessionId}/processing`);
     } catch (error: any) {
       toast.error(error.message);
@@ -47,22 +70,36 @@ export default function PastePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-6 space-y-8">
+    <div className="max-w-4xl mx-auto py-12 px-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+      </div>
+
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Paste Transcript</h1>
-        <p className="text-slate-600">Already have a transcript? Paste it here to extract insights.</p>
+        <h1 className="text-3xl font-bold">Edit Transcript</h1>
+        <p className="text-slate-600">Review or replace the transcript for this session. Saving will trigger a new insight extraction.</p>
       </div>
       
-      <Card className="border-slate-200 shadow-sm">
-        <CardContent className="p-6">
-          <Textarea 
-            placeholder="Paste your interview transcript here..." 
-            className="min-h-[400px] font-sans leading-relaxed"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-        </CardContent>
-      </Card>
+      {fetching ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+           <Loader2 className="w-10 h-10 animate-spin text-indigo-400 mb-4" />
+           <p className="text-slate-400">Loading current transcript...</p>
+        </div>
+      ) : (
+        <Card className="border-slate-200 shadow-sm overflow-hidden">
+          <CardContent className="p-0">
+            <Textarea 
+              placeholder="Paste your interview transcript here..." 
+              className="min-h-[500px] font-sans leading-relaxed border-0 focus-visible:ring-0 resize-none p-6 text-slate-700"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex justify-end gap-4">
         <Button variant="outline" onClick={() => router.back()}>Cancel</Button>

@@ -6,9 +6,16 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2, Edit2, Trash2 } from 'lucide-react';
+import { Users, Plus, ArrowLeft, ArrowRight, MessageSquare, Layout, Loader2, Edit2, Trash2, MoreVertical, FileText, Settings } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -81,6 +88,35 @@ export default function ProjectPage() {
     }
   };
 
+  const handleRenameProject = async () => {
+    const newName = prompt('Enter new project name:', project.name);
+    if (!newName) return;
+    
+    const { error } = await (supabase
+      .from('projects') as any)
+      .update({ name: newName })
+      .eq('id', projectId);
+
+    if (error) {
+      toast.error('Failed to rename project');
+    } else {
+      toast.success('Project renamed');
+      fetchData();
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!confirm('EXTREME CAUTION: Are you sure you want to delete this ENTIRE project? All stakeholders, transcripts, and synthesis data will be permanently deleted.')) return;
+    
+    const { error } = await supabase.from('projects').delete().eq('id', projectId);
+    if (error) {
+      toast.error('Failed to delete project');
+    } else {
+      toast.success('Project deleted');
+      router.push('/');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
@@ -122,6 +158,23 @@ export default function ProjectPage() {
           </p>
         </div>
         <div className="flex gap-3">
+           <DropdownMenu>
+             <DropdownMenuTrigger asChild>
+               <Button variant="ghost" size="icon" className="h-12 w-12 text-slate-400 hover:text-slate-600">
+                 <Settings className="w-5 h-5" />
+               </Button>
+             </DropdownMenuTrigger>
+             <DropdownMenuContent align="end">
+               <DropdownMenuItem onClick={handleRenameProject}>
+                 <Edit2 className="w-4 h-4 mr-2" /> Rename Project
+               </DropdownMenuItem>
+               <DropdownMenuSeparator />
+               <DropdownMenuItem onClick={handleDeleteProject} className="text-red-600 font-bold">
+                 <Trash2 className="w-4 h-4 mr-2" /> Delete Project
+               </DropdownMenuItem>
+             </DropdownMenuContent>
+           </DropdownMenu>
+
            <Button variant="outline" className="h-12 px-6" onClick={() => router.push(`/project/${projectId}/board`)}>
              <Layout className="w-4 h-4 mr-2" />
              Project Board
@@ -162,9 +215,29 @@ export default function ProjectPage() {
                           <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-indigo-600" onClick={() => handleEditSession(session)}>
                             <Edit2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400 hover:text-red-500" onClick={() => handleDeleteSession(session.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                          
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              <DropdownMenuItem onClick={() => router.push(`/session/${session.id}/paste`)}>
+                                <FileText className="w-4 h-4 mr-2" /> Edit/Paste Transcript
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/session/${session.id}/record`)}>
+                                <MessageSquare className="w-4 h-4 mr-2" /> Re-record Audio
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/session/${session.id}/upload`)}>
+                                <Plus className="w-4 h-4 mr-2" /> Re-upload Audio
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleDeleteSession(session.id)} className="text-red-600 font-bold">
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete Stakeholder
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                       <p className="text-sm text-slate-500">{session.stakeholder_role} • {session.interview_method}</p>
